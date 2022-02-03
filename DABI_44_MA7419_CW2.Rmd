@@ -1,0 +1,292 @@
+---
+title: "R Notebook"
+output:
+  html_document:
+    df_print: paged
+  pdf_document: default
+editor_options:
+  markdown:
+    wrap: 72
+---
+
+```{r}
+knitr::opts_chunk$set(warning = FALSE, message = FALSE) 
+```
+
+# Road Traffic Accidents in UK 
+
+#### Importing required libraries
+
+```{r}
+library(stats19)
+library(tidyr)
+library(knitr)
+library(tidyverse)
+library(ggplot2)
+```
+
+#### Getting Stats19 Data set by following years: 2017, 2018, 2019, 2020
+
+```{r}
+accident_2017 = get_stats19(year = 2017, type = "acc", format = FALSE)
+accident_2018 = get_stats19(year = 2018, type = "acc", format = FALSE)
+accident_2019 = get_stats19(year = 2019, type = "acc", format = FALSE)
+accident_2020 = get_stats19(year = 2020, type = "acc", format = FALSE)
+```
+
+## Data pre-processing
+
+-   **Finding number of NA values and print the number of rows
+    containing NA values**
+
+-   **Removing the NA valued rows**
+
+```{r}
+cat("Number of NA values in 2017 dataset: ", sum(is.na(accident_2017)))
+accident_2017 <- na.omit(accident_2017)
+```
+
+```{r}
+cat("Number of NA values in 2018 dataset: ", sum(is.na(accident_2018)))
+accident_2018 <- na.omit(accident_2018)
+```
+
+```{r}
+cat("Number of NA values in 2019 dataset: ", sum(is.na(accident_2019)))
+accident_2019 <- na.omit(accident_2019)
+```
+
+```{r}
+cat("Number of NA values in 2020 dataset: ", sum(is.na(accident_2020)))
+accident_2020 <- na.omit(accident_2020)
+```
+
+## Data exploration and analyzing
+
+**Severity cases statistics. Pie chat and Bar chart presented.**
+
+```{r}
+severity_rank_2020 <- accident_2020 %>% count(accident_severity, sort = TRUE)
+names(severity_rank_2020)[names(severity_rank_2020) == 'n'] <- 'Count_of_cases'
+severity_rank_2020 %>% knitr::kable()
+```
+
+**Year 2020**
+
+```{r}
+labels <- severity_rank_2020$accident_severity
+x <- severity_rank_2020$Count_of_cases
+
+piepercent<- round(100*x/sum(x), 1)
+
+pie(x, labels = piepercent, main = "Severity Ranking pie chart",col = rainbow(length(x)))
+legend("topright", c("3","2","1"), cex = 0.8, fill = rainbow(length(x)))
+
+barplot(x,names.arg=severity_rank_2020$accident_severity,xlab="Severity Ranking",ylab="Number of cases",col="blue",
+main="Severity chart",border="red", density=20)
+```
+
+**Year 2019**
+
+```{r}
+severity_rank_2019 <- accident_2019 %>% count(accident_severity, sort = TRUE)
+names(severity_rank_2019)[names(severity_rank_2019) == 'n'] <- 'Count_of_cases'
+severity_rank_2019 %>% knitr::kable()
+```
+
+**Year 2018**
+
+```{r}
+severity_rank_2018 <- accident_2018 %>% count(accident_severity, sort = TRUE)
+names(severity_rank_2018)[names(severity_rank_2018) == 'n'] <- 'Count_of_cases'
+severity_rank_2018 %>% knitr::kable()
+```
+
+**Year 2017**
+
+```{r}
+severity_rank_2017 <- accident_2017 %>% count(accident_severity, sort = TRUE)
+names(severity_rank_2017)[names(severity_rank_2017) == 'n'] <- 'Count_of_cases'
+severity_rank_2017 %>% knitr::kable()
+```
+
+**Day of the week statistics. Bar chart presented.**
+
+```{r}
+day_2020 <- accident_2020 %>% count(day_of_week)
+names(day_2020)[names(day_2020) == 'n'] <- 'Count_of_cases'
+day_2020 %>% knitr::kable()
+```
+
+```{r}
+barplot(day_2020$Count_of_cases,names.arg=day_2020$day_of_week,xlab="Day number in the week",ylab="Number of cases",col="blue", main="Day of the week plot",border="red", density=20)
+```
+
+**Speed Limit statistics. Bar chart presented.**
+
+```{r}
+speed_2020 <- accident_2020 %>% count(speed_limit)
+names(speed_2020)[names(speed_2020) == 'n'] <- 'Count_of_cases'
+speed_2020 %>% knitr::kable()
+```
+
+```{r}
+barplot(speed_2020$Count_of_cases,names.arg=speed_2020$speed_limit,xlab="Speed Limit mph",ylab="Number of cases",col="blue", main="Speed Limit plot",border="red", density=20)
+```
+
+**Top 3 LAH with most cases in 2020, 2019, 2018, and 2017 statistics.**
+
+```{r}
+LAH_2020 <- accident_2020 %>% group_by(local_authority_highway) %>% 
+  count(local_authority_highway)
+names(LAH_2020)[names(LAH_2020) == 'n'] <- 'Count_of_cases'
+head(LAH_2020 %>% arrange(desc(Count_of_cases)),3) %>% knitr::kable()
+```
+
+```{r}
+LAH_2019 <- accident_2019 %>% group_by(local_authority_highway) %>% 
+  count(local_authority_highway)
+names(LAH_2019)[names(LAH_2019) == 'n'] <- 'Count_of_cases'
+head(LAH_2019 %>% arrange(desc(Count_of_cases)),3) %>% knitr::kable()
+```
+
+```{r}
+LAH_2018 <- accident_2018 %>% group_by(local_authority_highway) %>% 
+  count(local_authority_highway)
+names(LAH_2018)[names(LAH_2018) == 'n'] <- 'Count_of_cases'
+head(LAH_2018 %>% arrange(desc(Count_of_cases)),3) %>% knitr::kable()
+```
+
+-   **For the year 2020 these are the areas with most accidents: Kent -
+    E10000016 - 2964 Surrey - E10000030 - 2334 Essex - E10000012 -
+    2064**
+
+-   **For the year 2019 these are the areas with most accidents: Kent -
+    E10000016 - 3619 Surrey - E10000030 - 2964 Birmingham - E08000025 -
+    2623**
+
+-   **For the year 2018 these are the areas with most accidents: Kent -
+    E10000016 - 3798 Surrey - E10000030 - 3111 Hampshire - E10000014 -
+    2615**
+
+-   **For the past three years, Kent and Surrey area has the most number
+    of accident cases in the United Kingdom.**
+
+**Top 3 Road Condition with most cases statistics. Pie chart
+presented.**
+
+```{r}
+road_condition_2020 <- accident_2020 %>% group_by(road_surface_conditions) %>% 
+  count(road_surface_conditions)
+names(road_condition_2020)[names(road_condition_2020) == 'n'] <- 'Count_of_cases'
+road_condition_2020 <- head(road_condition_2020 %>% arrange(desc(Count_of_cases)),3)
+```
+
+```{r}
+road_condition_2020 %>% knitr::kable()
+```
+
+```{r}
+labels <- road_condition_2020$road_surface_conditions
+x <- road_condition_2020$Count_of_cases
+
+piepercent<- round(100*x/sum(x), 1)
+
+pie(x, labels = piepercent, main = "Road surface condition",col = rainbow(length(x)))
+legend("topright", c("1","2","9"), cex = 0.8, fill = rainbow(length(x)))
+```
+
+**Top 3 Junction detail with most cases statistics. Pie chart
+presented.**
+
+```{r}
+junction_details_2020 <- accident_2020 %>% group_by(junction_detail) %>% 
+  count(junction_detail)
+names(junction_details_2020)[names(junction_details_2020) == 'n'] <- 'Count_of_cases'
+junction_details_2020 <- head(junction_details_2020 %>% arrange(desc(Count_of_cases)),3)
+```
+
+```{r}
+junction_details_2020 %>% knitr::kable()
+```
+
+```{r}
+labels <- junction_details_2020$junction_detail
+x <- junction_details_2020$Count_of_cases
+
+piepercent<- round(100*x/sum(x), 1)
+
+pie(x, labels = piepercent, main = "Junction detail",col = rainbow(length(x)))
+legend("topright", c("0","3",""), cex = 0.8, fill = rainbow(length(x)))
+```
+
+```{r}
+write.csv(accident_2017,"tab3.csv", row.names = FALSE)
+```
+
+```{r}
+data <- read.csv("tab.csv")
+```
+
+**Severity by all the years bar plot.**
+
+```{r}
+severity_rank <- data %>% group_by(Year) %>% count(accident_severity, sort = TRUE)
+names(severity_rank)[names(severity_rank) == 'n'] <- 'Count_of_cases'
+severity_rank %>% arrange(desc(Count_of_cases)) %>% knitr::kable()
+```
+
+```{r}
+barplot(severity_rank$Count_of_cases,names.arg=severity_rank$accident_severity ,xlab="Severity Ranking",ylab="Number of accidents",col=c("blue","darkgrey","black","pink"), main="Severity ranking by year",border="red")
+
+legend("topright",
+c("2017","2018","2019","2020"),
+fill = c("blue","darkgrey","black","pink")
+)
+```
+
+#### **Vehicle Type analysis by Severity ranking**
+
+```{r}
+vehicle_type <- read.csv("vehicle_type.csv")
+```
+
+**Top 3 vehicle type by severity ranking**
+
+```{r}
+head(vehicle_type %>% group_by(Vehicle) %>% filter(Severity==1) %>% arrange(desc(cases)),3) %>% knitr::kable()
+```
+
+```{r}
+head(vehicle_type %>% group_by(Vehicle) %>% filter(Severity==2) %>% arrange(desc(cases)),3) %>% knitr::kable()
+```
+
+```{r}
+head(vehicle_type %>% group_by(Vehicle) %>% filter(Severity==3) %>% arrange(desc(cases)),3) %>% knitr::kable()
+```
+
+## Linear Regression and Analysis Conclusion
+
+```{r}
+a <- nrow(accident_2020)
+b <- nrow(accident_2019)
+c <- nrow(accident_2018)
+d <- nrow(accident_2017)
+
+cat("Total number accident cases for the year 2020, 2019, 2018 and 2017 are", a ,",", b,",",c,",",d,"respectively")
+```
+
+```{r}
+y <- c(d, c, b, a)
+x <- c(2017,2018,2019,2020)
+cor(x,y)
+relation <- lm(y~x)
+print(relation)
+```
+
+```{r}
+plot(x, y, pch = 16, cex = 1.3, col = "blue", abline(relation), main = "Regression plot", xlab = "Year", ylab = "Total accident cases")
+```
+
+**There is a decreasing trend in the number of accident cases over the
+year and it is expected to decrease for next few years too.**
